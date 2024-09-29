@@ -1,0 +1,47 @@
+import serial
+import time
+
+# Replace 'COM3' with the correct port for your system, like '/dev/ttyUSB0' or 'COM4'
+ser = serial.Serial('COM3', 9600, timeout=1)  # 9600 is the baud rate
+time.sleep(2)  # Allow time for the serial connection to establish
+
+def read_from_arduino():
+    if ser.in_waiting > 0:
+        try:
+            # Read the data sent from Arduino (decode it from bytes to a string)
+            data = ser.readline().decode('utf-8').strip()
+            if data:
+                # Split the data into age and chloride level based on comma separation
+                age, chloride_level = data.split(",")
+                age = int(age)
+                chloride_level = float(chloride_level)
+                return age, chloride_level
+        except Exception as e:
+            print(f"Error reading data: {e}")
+    return None, None
+
+while True:
+    # Read data from Arduino
+    age, chloride_level = read_from_arduino()
+    
+    if age is not None and chloride_level is not None:
+        # Print the values received from Arduino
+        print(f"Age: {age}, Chloride Level: {chloride_level:.2f} mmol/L")
+
+        # Perform analysis or processing in Python
+        if age < 18:
+            if chloride_level > 60:
+                print("High chloride level: Positive for Cystic Fibrosis.")
+            elif 30 <= chloride_level <= 59:
+                print("Intermediate chloride level: Further testing needed.")
+            else:
+                print("Normal chloride level: CF unlikely.")
+        else:
+            if chloride_level > 60:
+                print("High chloride level: Positive for Cystic Fibrosis.")
+            elif 40 <= chloride_level <= 59:
+                print("Intermediate chloride level: Further testing needed.")
+            else:
+                print("Normal chloride level: CF unlikely.")
+    
+    time.sleep(2)  # Delay to match Arduino's delay
