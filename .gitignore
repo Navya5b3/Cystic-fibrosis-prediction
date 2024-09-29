@@ -45,3 +45,54 @@ while True:
                 print("Normal chloride level: CF unlikely.")
     
     time.sleep(2)  # Delay to match Arduino's delay
+
+
+ //ARDUINO CODE:
+
+
+int sensorPin = A0;      // Analog pin for the conductivity sensor
+int agePin = A1;         // Analog pin for reading age input (e.g., a potentiometer or digital input)
+float voltage, chlorideLevel;
+int age;
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(sensorPin, INPUT);
+  pinMode(agePin, INPUT);
+}
+
+void loop() {
+  // Read sensor value for sweat chloride level
+  int sensorValue = analogRead(sensorPin);
+  voltage = (sensorValue / 1024.0) * 5.0;  // Convert analog reading to voltage
+  chlorideLevel = voltage * 100;           // Example calculation for chloride level (adjust based on calibration)
+
+  // Read age from a potentiometer or input device (for testing, replace with actual age)
+  age = analogRead(agePin) / 10;  // Simulating age input for testing, map value to realistic age range (0-100)
+
+  // Determine diagnosis based on age and chloride level
+  Serial.print("Age: ");
+  Serial.print(age);
+  Serial.print(", Chloride Level (mmol/L): ");
+  Serial.println(chlorideLevel);
+
+  if (age < 18) {  // For children and infants
+    if (chlorideLevel > 60) {
+      Serial.println("High chloride level: Positive for Cystic Fibrosis.");
+    } else if (chlorideLevel >= 30 && chlorideLevel <= 59) {
+      Serial.println("Intermediate chloride level: Further testing needed.");
+    } else {
+      Serial.println("Normal chloride level: CF unlikely.");
+    }
+  } else {  // For adults
+    if (chlorideLevel > 60) {
+      Serial.println("High chloride level: Positive for Cystic Fibrosis.");
+    } else if (chlorideLevel >= 40 && chlorideLevel <= 59) {
+      Serial.println("Intermediate chloride level: Further testing needed.");
+    } else {
+      Serial.println("Normal chloride level: CF unlikely.");
+    }
+  }
+
+  delay(2000);  // Wait before the next reading
+}
